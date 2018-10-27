@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "votingsassignment-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/votingsassignment/VotingsassignmentWebPart.js",
+          "manifest": "./src/webparts/votingsassignment/VotingsassignmentWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "VotingsassignmentWebPartStrings": "lib/webparts/votingsassignment/loc/{locale}.js"
+  }
+}

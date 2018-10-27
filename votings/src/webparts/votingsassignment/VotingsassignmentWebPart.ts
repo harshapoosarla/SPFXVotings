@@ -11,6 +11,8 @@ import * as strings from 'VotingsassignmentWebPartStrings';
 
 import { SPComponentLoader } from '@microsoft/sp-loader';
 import * as $ from 'jquery';
+import * as pnp from 'sp-pnp-js';
+
 import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 import { SPListItem } from '@microsoft/sp-page-context';
 require('bootstrap');
@@ -36,7 +38,7 @@ export default class VotingsassignmentWebPart extends BaseClientSideWebPart<IVot
               <div id="myvenues">
               
               </div></br>
-              <button type="button" class="btn-primary btn-sm">Submit</button>
+              <button id="submitbutton" type="button" class="btn-primary btn-sm">Submit</button>
               
             
             </div>
@@ -44,6 +46,8 @@ export default class VotingsassignmentWebPart extends BaseClientSideWebPart<IVot
         </div>
       </div>`;
       $(document).ready(function(){
+        
+
         var call = jQuery.ajax({
           url:URL+ "/_api/Web/Lists/getByTitle('HarshaVenues')/Items?$select=Title,ID",
            type: "GET",
@@ -65,34 +69,98 @@ export default class VotingsassignmentWebPart extends BaseClientSideWebPart<IVot
        var message = response ? response.error.message.value : textStatus;
        alert("Call hutch failed. Error: " + message);
        });
-      });
-      $(document).on("click", ".btn" , function() {
-        var a =  $(this).attr("id");
-        alert('voting for'+ a);
-       
+       var a;
+       $(document).on("click", ".btn" , function() {
+        a =  $(this).attr("id");
+       alert('voting for'+ a);
      });
-      //this.getInfo();
+
+     $(document).on("click", "#submitbutton" , function() {
+      //var a =  $(this).attr("id");
+      UpdateItem(a);
+  });
+  function UpdateItem(a){
+    alert('voting for         '+ a);
+     pnp.sp.web.lists.getByTitle("HarshaVotes").items.getById(1).update({
+     VenueLookupId: a
+     });
+
   }
-  private getInfo() {
-    let html: string = '';
-    if (Environment.type === EnvironmentType.Local) {
-      this.domElement.querySelector('#myvenues').innerHTML = "Sorry this does not work in local workbench";
-    } else {
-    this.context.spHttpClient.get
-    (
-      this.context.pageContext.web.absoluteUrl + `/_api/web/lists/getByTitle('HarshaVenues')?$select=Title,ID`, 
-      SPHttpClient.configurations.v1)
-      .then((response: SPHttpClientResponse) => {
-        response.json().then((items: any) => {
-          items.value.forEach(SPListItem => {
-            html += `
-            <button type="button" class="btn active btn-primary" value="${SPListItem.ID}">${SPListItem.Title}</button>`;
-          });
-          this.domElement.querySelector('#myvenues').innerHTML = html;
-        });
-      });        
-    }
-  }
+
+      });
+     
+     
+  
+}
+     
+     
+    //  function updateItem() {
+    //       alert("entered update item");
+    //       var call = jQuery.ajax({
+    //           url: URL + "/_api/Web/Lists/getByTitle('HarshaVotes')/Items?$select=Title,ID",
+    //           type: "GET",
+    //           dataType: "json",
+    //           headers: {
+    //               Accept: "application/json;odata=verbose"
+    //           }
+    //       });
+    //       call.done(function (data, textStatus, jqXHR) {
+    //             var items = data.d.results;
+    //             if (items.length > 0) {
+    //                 var item = items[0];
+    //                 updateItem(item);
+    //             }
+    //         });
+    //         call.fail(function (jqXHR, textStatus, errorThrown) {
+    //         });
+    //     function updateItem(item) {
+    //               var call = jQuery.ajax({
+    //                   url: URL +"/_api/Web/Lists/getByTitle('HarshaVotes')/Items(" + item.Id + ")",
+    //                   type: "POST",
+    //                   data: JSON.stringify({
+    //                       "__metadata": { type: "SP.Data.TasksListItem" },
+    //                       Status: "In Progress",
+    //                       PercentComplete: 0.10
+    //                   }),
+    //                   headers: {
+    //                       Accept: "application/json;odata=verbose",
+    //                       "Content-Type": "application/json;odata=verbose",
+    //                       "X-RequestDigest": jQuery("#__REQUESTDIGEST").val(),
+    //                       "IF-MATCH": item.__metadata.etag,
+    //                       "X-Http-Method": "PATCH"
+    //                   }
+    //               });
+    //               call.done(function (data, textStatus, jqXHR) {
+    //                   var div = jQuery("#message");
+    //                   div.text("Item updated");
+    //               });
+    //               call.fail(function (jqXHR, textStatus, errorThrown) {
+    //               failHandler(jqXHR, textStatus, errorThrown);
+    //               });
+    //           }
+    //this.getInfo();
+      
+    
+  //   private getInfo() {
+  //   let html: string = '';
+  //   if (Environment.type === EnvironmentType.Local) {
+  //     this.domElement.querySelector('#myvenues').innerHTML = "Sorry this does not work in local workbench";
+  //   } else {
+  //   this.context.spHttpClient.get
+  //   (
+  //     this.context.pageContext.web.absoluteUrl + `/_api/web/lists/getByTitle('HarshaVenues')?$select=Title,ID`, 
+  //     SPHttpClient.configurations.v1)
+  //     .then((response: SPHttpClientResponse) => {
+  //       response.json().then((items: any) => {
+  //         items.value.forEach(SPListItem => {
+  //           html += `
+  //           <button type="button" class="btn active btn-primary" value="${SPListItem.ID}">${SPListItem.Title}</button>`;
+  //         });
+  //         this.domElement.querySelector('#myvenues').innerHTML = html;
+  //       });
+  //     });        
+  //   }
+  // }
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
     return {
       pages: [

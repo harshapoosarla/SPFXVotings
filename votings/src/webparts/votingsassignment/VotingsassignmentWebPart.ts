@@ -12,6 +12,7 @@ import * as strings from 'VotingsassignmentWebPartStrings';
 import { SPComponentLoader } from '@microsoft/sp-loader';
 import * as $ from 'jquery';
 import * as pnp from 'sp-pnp-js';
+import Chart from 'chart.js';
 
 import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 import { SPListItem } from '@microsoft/sp-page-context';
@@ -37,16 +38,40 @@ export default class VotingsassignmentWebPart extends BaseClientSideWebPart<IVot
               
               <div id="myvenues">
               
-              </div></br>
+              </div>
+              </br>
               <button id="submitbutton" type="button" class="btn-primary btn-sm">Submit</button>
-              
+              </br>
+              </br>
+              <div id="piechart" style="background-color:powderblue">
+              <h3>Voting results for Venue</h3>
+              <canvas id="pie-chart" width="50%" height="50%"></canvas>
+              </div>
             
             </div>
           </div>
         </div>
       </div>`;
       $(document).ready(function(){
-        
+
+        /************************Pie Chart*****************/
+      new Chart(document.getElementById("pie-chart"), {
+        type: 'pie',
+        data: {
+          labels: ["Hyderabad", "Visakhapatnam", "NewDelhi", "Bangalore"],
+          datasets: [{
+            label: "Votes (numbers)",
+            backgroundColor: ["Green", "Cyan","Red","Orange"],
+            data: [0,1,0,0]
+          }]
+        },
+        options: {
+          title: {
+            display: true,
+            //text: 'Voting results for Venue(2018)'
+          }
+        }
+    });
 
         var call = jQuery.ajax({
           url:URL+ "/_api/Web/Lists/getByTitle('HarshaVenues')/Items?$select=Title,ID",
@@ -76,24 +101,16 @@ export default class VotingsassignmentWebPart extends BaseClientSideWebPart<IVot
      });
 
      $(document).on("click", "#submitbutton" , function() {
-      //var a =  $(this).attr("id");
-      UpdateItem(a);
+     UpdateItem(a);
   });
   function UpdateItem(a){
-    alert('voting for         '+ a);
+    alert('submit vote for'+a);
      pnp.sp.web.lists.getByTitle("HarshaVotes").items.getById(1).update({
      VenueLookupId: a
      });
-
-  }
-
-      });
-     
-     
-  
+    }
+  });
 }
-     
-     
     //  function updateItem() {
     //       alert("entered update item");
     //       var call = jQuery.ajax({
@@ -125,8 +142,6 @@ export default class VotingsassignmentWebPart extends BaseClientSideWebPart<IVot
     //                   headers: {
     //                       Accept: "application/json;odata=verbose",
     //                       "Content-Type": "application/json;odata=verbose",
-    //                       "X-RequestDigest": jQuery("#__REQUESTDIGEST").val(),
-    //                       "IF-MATCH": item.__metadata.etag,
     //                       "X-Http-Method": "PATCH"
     //                   }
     //               });

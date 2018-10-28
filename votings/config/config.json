@@ -20,7 +20,12 @@
   "path": "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js",
   "globalName": "bootstrap",
   "globalDependencies": ["jquery"]
-  } 
+  },
+  "chartjs": {
+    "path": "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js",
+    "globalName": "chartjs",
+    "globalDependencies": ["jquery"]
+  }
 },
   "localizedResources": {
     "VotingsassignmentWebPartStrings": "lib/webparts/votingsassignment/loc/{locale}.js"

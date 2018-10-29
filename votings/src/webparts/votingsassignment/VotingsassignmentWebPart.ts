@@ -172,7 +172,7 @@ alert(PreviousSelectedOptionID);
        var Data = $('#myvenues');
        $.each(data.d.results, function (Title, element) {
         ArrayLocation[Title]=element.Title;
-        ArrayLocationVotes[Title]=[element.Title,element.VoteCount];
+        ArrayLocationVotes[Title]=[element.Title,element.TotalVotes];
        Data.append("<button id='"+element.ID+"' type='button'class='btn active btn-lg btn-primary votebutton'>" + element.Title +  "</button></br>");
        
        
@@ -242,7 +242,7 @@ alert(PreviousSelectedOptionID);
       var NewVoteCount=ArrayLocationVotes[NewLocationIndex][1]+1;
 
       /**----------- Members list updated----------------- */
-      pnp.sp.web.lists.getByTitle("HarshaVenues").items.getById( PreviousSelectedOptionID).update({
+      pnp.sp.web.lists.getByTitle("HarshaVenues").items.getById(PreviousSelectedOptionID).update({
         TotalVotes: OldVoteCount
         });
 
@@ -255,30 +255,11 @@ alert(PreviousSelectedOptionID);
         VenueLookupId: a
       });
 
-      
-      
-
-     
-
       }
-
-
       ArrayLocationVotes[OldLocationIndex][1]=OldVoteCount;      
       ArrayLocationVotes[NewLocationIndex][1]=NewVoteCount;
- 
       PreviousSelectedOptionID=a;
- 
-
-     
     }
-
-    
-
-
-
-   
-
- 
 }
     //  function updateItem() {
     //       alert("entered update item");

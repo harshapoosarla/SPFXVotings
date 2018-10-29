@@ -13,6 +13,7 @@ import { SPComponentLoader } from '@microsoft/sp-loader';
 import * as $ from 'jquery';
 import * as pnp from 'sp-pnp-js';
 import Chart from 'chart.js';
+import {GoogleCharts} from 'google-charts';
 
 import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 import { SPListItem } from '@microsoft/sp-page-context';
@@ -26,6 +27,18 @@ export default class VotingsassignmentWebPart extends BaseClientSideWebPart<IVot
 
   public render(): void {
     var URL = this.context.pageContext.web.absoluteUrl;
+    var SelectedButtonID;
+    var CurrentUserEmail = this.context.pageContext.user.email;
+    var CurrentUserId;
+    var ArrayLocation =[];
+    var ArrayLocationVotes=[[]];
+    var PieChartDataLegends=[['Location','Votes'] ];
+    var PieChartData;
+    var a;
+    var PreviousSelctedOptionID;
+    var PreviousSelectedOptionID;
+
+
     let url = "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css";
     SPComponentLoader.loadCss(url);
     this.domElement.innerHTML = `
@@ -36,25 +49,66 @@ export default class VotingsassignmentWebPart extends BaseClientSideWebPart<IVot
               <span class="${ styles.title }"></span>
               <p class="${ styles.subTitle }"></p>
               
-              <div id="myvenues">
+              <div class="row venuesrow"></br>
+                
+                <div id="myvenues" class="col-md-8">
               
+                </div>
               </div>
+
+
               </br>
               <button id="submitbutton" type="button" class="btn-primary btn-sm">Submit</button>
               </br>
               </br>
+              
               <div id="piechart" style="background-color:powderblue">
               <h3>Voting results for Venue</h3>
               <canvas id="pie-chart" width="50%" height="50%"></canvas>
+              </div>
+
+              <div id="chart1" style="background-color:powderblue">
+              
               </div>
             
             </div>
           </div>
         </div>
       </div>`;
+      $(document).on("click", ".votebutton", function () {
+        SelectedButtonID = 0;
+        var clicked = $(this);
+        if (clicked.hasClass('active')) {
+          $('.votebutton').prop('disabled', false);
+          clicked.removeClass('active');
+        } else {
+          $('.votebutton').prop('disabled', true);
+          clicked.prop('disabled', false).addClass("active");
+        }
+      });
       $(document).ready(function(){
 
-        /************************Pie Chart*****************/
+      //GoogleCharts.load(drawChart);
+      function drawChart() {
+
+        PieChartData=PieChartDataLegends;
+    ArrayLocationVotes.forEach(element => {
+      PieChartData.push(element);
+    }); 
+      // Standard google charts functionality is available as GoogleCharts.api after load
+      const data = GoogleCharts.api.visualization.arrayToDataTable(PieChartData
+    //     [
+    //   ['Chart thing', 'Chart amount'],
+    //   ['Lorem ipsum', 60],
+    //   ['Dolor sit', 22],
+    //   ['Sit amet', 18]
+    // ]
+    );
+    const pie_1_chart = new GoogleCharts.api.visualization.PieChart(document.getElementById('chart1'));
+    pie_1_chart.draw(data);
+ }
+
+      /***********************Pie Chart**********************/
       new Chart(document.getElementById("pie-chart"), {
         type: 'pie',
         data: {
@@ -73,8 +127,40 @@ export default class VotingsassignmentWebPart extends BaseClientSideWebPart<IVot
         }
     });
 
-        var call = jQuery.ajax({
-          url:URL+ "/_api/Web/Lists/getByTitle('HarshaVenues')/Items?$select=Title,ID",
+    var callAssignDisplayItems = jQuery.ajax({
+      url: URL+ "/_api/web/lists/getByTitle('HarshaVotes')/items?$select=Title,ID,VenueLookup/ID&$expand=VenueLookup/ID",
+      type: "GET",
+      dataType: "json",
+      headers: {
+        Accept: "application/json;odata=verbose"
+      }
+    });
+
+    var call = jQuery.when(callAssignDisplayItems);
+    call.done(function (data, textStatus, jqXHR) {
+
+      jQuery.each(data.d.results, function (index, value) {
+
+        /**---------- verifying if the user is present in the list or not------------- */
+        if (value.Title == CurrentUserEmail) {
+          CurrentUserId = value.ID;
+          PreviousSelectedOptionID = value.VenueLookup.ID;
+alert(PreviousSelectedOptionID);
+          //CreateVenueButtons(SelectedBtnID);//calling button creation function
+        }
+        
+
+      });
+    });
+    call.fail(function (jqXHR, textStatus, errorThrown) {
+      var response = JSON.parse(jqXHR.responseText);
+      var message = response ? response.error.message.value : textStatus;
+      alert("Call failed. Error: " + message);
+    });
+
+          /********************* Display venue buttons **************/
+        var call1 = jQuery.ajax({
+          url:URL+ "/_api/Web/Lists/getByTitle('HarshaVenues')/Items?$select=Title,ID,TotalVotes",
            type: "GET",
            dataType: "json",
            headers: {
@@ -82,34 +168,117 @@ export default class VotingsassignmentWebPart extends BaseClientSideWebPart<IVot
            "Content-Type": "application/json;odata=verbose"
            }
        });
-       call.done(function (data, textStatus, jqXHR) {     
+       call1.done(function (data, textStatus, jqXHR) {     
        var Data = $('#myvenues');
        $.each(data.d.results, function (Title, element) {
-              
-        Data.append("<button id='"+element.ID+"' type='button'class='btn active btn-lg btn-primary'>" + element.Title +  "</button>");
-       });
-       });
+        ArrayLocation[Title]=element.Title;
+        ArrayLocationVotes[Title]=[element.Title,element.VoteCount];
+       Data.append("<button id='"+element.ID+"' type='button'class='btn active btn-lg btn-primary votebutton'>" + element.Title +  "</button></br>");
+       
+       
+      });
+      GoogleCharts.load(drawChart);
+      
+      if (true) {
+        $('.votebutton').prop('disabled', true);
+        $("#"+PreviousSelectedOptionID ).addClass("active").prop('disabled', false);
+    }
+
+
+
+      });
        call.fail(function (jqXHR, textStatus, errorThrown) {
        var response = JSON.parse(jqXHR.responseText);
        var message = response ? response.error.message.value : textStatus;
        alert("Call hutch failed. Error: " + message);
        });
-       var a;
+       
        $(document).on("click", ".btn" , function() {
         a =  $(this).attr("id");
        alert('voting for'+ a);
      });
-
+    }); 
      $(document).on("click", "#submitbutton" , function() {
      UpdateItem(a);
+
+     GoogleCharts.load(drawChart1);
+ 
+     function drawChart1() {
+      PieChartData=[[]];
+      var PieChartDataLegends=[['Location','Votes'] ];
+      PieChartData=PieChartDataLegends;
+      ArrayLocationVotes.forEach(element => {
+        PieChartData.push(element);
+      }); 
+      
+         // Standard google charts functionality is available as GoogleCharts.api after load
+         const data = GoogleCharts.api.visualization.arrayToDataTable(PieChartData);
+             //[ ['Chart thing', 'Chart amount'],
+             // ['Lorem ipsum', 60],
+             // ['Dolor sit', 22],
+             // ['Sit amet', 18]
+             //]
+         
+         const pie_1_chart = new GoogleCharts.api.visualization.PieChart(document.getElementById('PieChart1'));
+         pie_1_chart.draw(data);
+     }
   });
+          /*************** updating user responses into list ******************/
   function UpdateItem(a){
-    alert('submit vote for'+a);
+
+   alert('submit vote for'+a);
      pnp.sp.web.lists.getByTitle("HarshaVotes").items.getById(1).update({
      VenueLookupId: a
      });
+
+
+     if(a!= PreviousSelectedOptionID){
+      /* increase the vote count.... write function to post in venues votecount*/ 
+      var OldLocationIndex= PreviousSelectedOptionID-1;
+      var OldVoteCount=ArrayLocationVotes[OldLocationIndex][1]-1;
+      
+
+      var NewLocationIndex=a-1;
+      var NewVoteCount=ArrayLocationVotes[NewLocationIndex][1]+1;
+
+      /**----------- Members list updated----------------- */
+      pnp.sp.web.lists.getByTitle("HarshaVenues").items.getById( PreviousSelectedOptionID).update({
+        TotalVotes: OldVoteCount
+        });
+
+
+      pnp.sp.web.lists.getByTitle("HarshaVenues").items.getById(a).update({
+      TotalVotes: NewVoteCount
+      });
+      /**----------- Members list updated----------------- */
+      pnp.sp.web.lists.getByTitle("HarshaVotes").items.getById(1).update({
+        VenueLookupId: a
+      });
+
+      
+      
+
+     
+
+      }
+
+
+      ArrayLocationVotes[OldLocationIndex][1]=OldVoteCount;      
+      ArrayLocationVotes[NewLocationIndex][1]=NewVoteCount;
+ 
+      PreviousSelectedOptionID=a;
+ 
+
+     
     }
-  });
+
+    
+
+
+
+   
+
+ 
 }
     //  function updateItem() {
     //       alert("entered update item");

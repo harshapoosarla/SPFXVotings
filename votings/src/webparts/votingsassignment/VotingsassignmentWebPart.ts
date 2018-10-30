@@ -33,7 +33,7 @@ export default class VotingsassignmentWebPart extends BaseClientSideWebPart<IVot
     var ArrayLocation =[];
     var ArrayLocationVotes=[[]];
     var PieChartDataLegends=[['Location','Votes'] ];
-    var PieChartData;
+    var PieChartData=[[]];
     var a;
     var PreviousSelctedOptionID;
     var PreviousSelectedOptionID;
@@ -49,26 +49,22 @@ export default class VotingsassignmentWebPart extends BaseClientSideWebPart<IVot
               <span class="${ styles.title }"></span>
               <p class="${ styles.subTitle }"></p>
               
-              <div class="row venuesrow"></br>
+              </br>
                 
-                <div id="myvenues" class="col-md-8">
-              
+                <div id="myvenues" >
+                
                 </div>
-              </div>
-
-
+              
               </br>
-              <button id="submitbutton" type="button" class="btn-primary btn-sm">Submit</button>
+              <button id="submitbutton" type="button" class="btn-success btn-sm">Submit</button>
               </br>
               </br>
               
-              <div id="piechart" style="background-color:powderblue">
+              <div id="piechart" style="background-color:powderblue;color:red;text-align:center;">
               <h3>Voting results for Venue</h3>
-              <canvas id="pie-chart" width="50%" height="50%"></canvas>
               </div>
-
               <div id="chart1" style="background-color:powderblue">
-              
+              <canvas id="chart1" width="400%" height="400%"></canvas>
               </div>
             
             </div>
@@ -89,43 +85,26 @@ export default class VotingsassignmentWebPart extends BaseClientSideWebPart<IVot
       $(document).ready(function(){
 
       //GoogleCharts.load(drawChart);
-      function drawChart() {
-
-        PieChartData=PieChartDataLegends;
-    ArrayLocationVotes.forEach(element => {
-      PieChartData.push(element);
-    }); 
-      // Standard google charts functionality is available as GoogleCharts.api after load
-      const data = GoogleCharts.api.visualization.arrayToDataTable(PieChartData
-    //     [
-    //   ['Chart thing', 'Chart amount'],
-    //   ['Lorem ipsum', 60],
-    //   ['Dolor sit', 22],
-    //   ['Sit amet', 18]
-    // ]
-    );
-    const pie_1_chart = new GoogleCharts.api.visualization.PieChart(document.getElementById('chart1'));
-    pie_1_chart.draw(data);
- }
+     
 
       /***********************Pie Chart**********************/
-      new Chart(document.getElementById("pie-chart"), {
-        type: 'pie',
-        data: {
-          labels: ["Hyderabad", "Visakhapatnam", "NewDelhi", "Bangalore"],
-          datasets: [{
-            label: "Votes (numbers)",
-            backgroundColor: ["Green", "Cyan","Red","Orange"],
-            data: [0,1,0,0]
-          }]
-        },
-        options: {
-          title: {
-            display: true,
-            //text: 'Voting results for Venue(2018)'
-          }
-        }
-    });
+    //   new Chart(document.getElementById("pie-chart"), {
+    //     type: 'pie',
+    //     data: {
+    //       labels: ["Hyderabad", "Visakhapatnam", "NewDelhi", "Bangalore"],
+    //       datasets: [{
+    //         label: "Votes (numbers)",
+    //         backgroundColor: ["Green", "Cyan","Red","Orange"],
+    //         data: [0,1,0,0]
+    //       }]
+    //     },
+    //     options: {
+    //       title: {
+    //         display: true,
+    //         //text: 'Voting results for Venue(2018)'
+    //       }
+    //     }
+    // });
 
     var callAssignDisplayItems = jQuery.ajax({
       url: URL+ "/_api/web/lists/getByTitle('HarshaVotes')/items?$select=Title,ID,VenueLookup/ID&$expand=VenueLookup/ID",
@@ -146,10 +125,8 @@ export default class VotingsassignmentWebPart extends BaseClientSideWebPart<IVot
           CurrentUserId = value.ID;
           PreviousSelectedOptionID = value.VenueLookup.ID;
 alert(PreviousSelectedOptionID);
-          //CreateVenueButtons(SelectedBtnID);//calling button creation function
+          CreateVenueButtons(a);//calling button creation function
         }
-        
-
       });
     });
     call.fail(function (jqXHR, textStatus, errorThrown) {
@@ -159,6 +136,7 @@ alert(PreviousSelectedOptionID);
     });
 
           /********************* Display venue buttons **************/
+          function CreateVenueButtons(a){
         var call1 = jQuery.ajax({
           url:URL+ "/_api/Web/Lists/getByTitle('HarshaVenues')/Items?$select=Title,ID,TotalVotes",
            type: "GET",
@@ -168,12 +146,13 @@ alert(PreviousSelectedOptionID);
            "Content-Type": "application/json;odata=verbose"
            }
        });
+       
        call1.done(function (data, textStatus, jqXHR) {     
        var Data = $('#myvenues');
        $.each(data.d.results, function (Title, element) {
         ArrayLocation[Title]=element.Title;
         ArrayLocationVotes[Title]=[element.Title,element.TotalVotes];
-       Data.append("<button id='"+element.ID+"' type='button'class='btn active btn-lg btn-primary votebutton'>" + element.Title +  "</button></br>");
+       Data.append("<button id='"+element.ID+"' type='button'class='btn btn-lg btn-primary votebutton'>" + element.Title +  "</button></br>");
        
        
       });
@@ -186,14 +165,35 @@ alert(PreviousSelectedOptionID);
 
 
 
-      });
-       call.fail(function (jqXHR, textStatus, errorThrown) {
-       var response = JSON.parse(jqXHR.responseText);
-       var message = response ? response.error.message.value : textStatus;
-       alert("Call hutch failed. Error: " + message);
-       });
-       
-       $(document).on("click", ".btn" , function() {
+    });
+      call.fail(function (jqXHR, textStatus, errorThrown) {
+      var response = JSON.parse(jqXHR.responseText);
+      var message = response ? response.error.message.value : textStatus;
+      alert("Call hutch failed. Error: " + message);
+    });
+       function drawChart() {
+
+      PieChartData=PieChartDataLegends;
+      ArrayLocationVotes.forEach(element => {
+      PieChartData.push(element);
+    }); 
+      // Standard google charts functionality is available as GoogleCharts.api after load
+      const data = GoogleCharts.api.visualization.arrayToDataTable(PieChartData
+    //     [
+    //   ['Chart thing', 'Chart amount'],
+    //   ['Lorem ipsum', 60],
+    //   ['Dolor sit', 22],
+    //   ['Sit amet', 18]
+    // ]
+    );
+    const pie_1_chart = new GoogleCharts.api.visualization.PieChart(document.getElementById('chart1'));
+    pie_1_chart.draw(data);
+ }
+          } /**create venue ends here */
+
+
+
+          $(document).on("click", ".btn" , function() {
         a =  $(this).attr("id");
        alert('voting for'+ a);
      });
@@ -227,9 +227,10 @@ alert(PreviousSelectedOptionID);
   function UpdateItem(a){
 
    alert('submit vote for'+a);
-     pnp.sp.web.lists.getByTitle("HarshaVotes").items.getById(1).update({
+     pnp.sp.web.lists.getByTitle("HarshaVotes").items.getById(CurrentUserId).update({
      VenueLookupId: a
      });
+     
 
 
      if(a!= PreviousSelectedOptionID){
@@ -256,6 +257,32 @@ alert(PreviousSelectedOptionID);
       });
 
       }
+
+      GoogleCharts.load(drawChart);
+      function drawChart() {
+        PieChartData=[[]];
+        PieChartDataLegends=[['Location','Votes'] ];
+    
+        PieChartData=PieChartDataLegends;
+        ArrayLocationVotes.forEach(element => {
+        PieChartData.push(element);
+      }); 
+        // Standard google charts functionality is available as GoogleCharts.api after load
+        const data = GoogleCharts.api.visualization.arrayToDataTable(PieChartData
+      //     [
+      //   ['Chart thing', 'Chart amount'],
+      //   ['Lorem ipsum', 60],
+      //   ['Dolor sit', 22],
+      //   ['Sit amet', 18]
+      // ]
+      );
+      const pie_1_chart = new GoogleCharts.api.visualization.PieChart(document.getElementById('chart1'));
+      pie_1_chart.draw(data);
+   }
+
+
+
+
       ArrayLocationVotes[OldLocationIndex][1]=OldVoteCount;      
       ArrayLocationVotes[NewLocationIndex][1]=NewVoteCount;
       PreviousSelectedOptionID=a;

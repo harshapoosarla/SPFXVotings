@@ -17,6 +17,7 @@ import {GoogleCharts} from 'google-charts';
 
 import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 import { SPListItem } from '@microsoft/sp-page-context';
+import { CurrentUser } from 'sp-pnp-js/lib/sharepoint/siteusers';
 require('bootstrap');
 
 export interface IVotingsassignmentWebPartProps {
@@ -35,6 +36,7 @@ export default class VotingsassignmentWebPart extends BaseClientSideWebPart<IVot
     var PieChartDataLegends=[['Location','Votes'] ];
     var PieChartData=[[]];
     var a;
+    //var b;
     var PreviousSelctedOptionID;
     var PreviousSelectedOptionID;
 
@@ -200,6 +202,7 @@ alert(PreviousSelectedOptionID);
     }); 
      $(document).on("click", "#submitbutton" , function() {
      UpdateItem(a);
+     //AddItem(b);
 
      GoogleCharts.load(drawChart1);
  
@@ -219,10 +222,24 @@ alert(PreviousSelectedOptionID);
              // ['Sit amet', 18]
              //]
          
-         const pie_1_chart = new GoogleCharts.api.visualization.PieChart(document.getElementById('PieChart1'));
-         pie_1_chart.draw(data);
+        const pie_1_chart = new GoogleCharts.api.visualization.PieChart(document.getElementById('PieChart1'));
+        pie_1_chart.draw(data);
      }
   });
+  /*************** add user ****************/
+  // b =  $(this).attr("id");
+  // function AddItem(b)
+  // { 
+  //     pnp.sp.web.lists.getByTitle("HarshaVotes").items.add({   
+  //     Title : document.getElementById("Title")[CurrentUser],
+  //     VenueLookup : document.getElementById("VenueLookup")[""],
+  //     });
+  // }
+
+  /*************** end of  add user ****************/
+
+
+
           /*************** updating user responses into list ******************/
   function UpdateItem(a){
 
